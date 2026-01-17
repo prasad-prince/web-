@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attendance - Study Goal Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    * {
+      font-family: 'Poppins', 'Inter', sans-serif;
+    }
+    .sidebar {
+      transition: all 0.3s ease;
+    }
+    .sidebar-link {
+      transition: all 0.3s ease;
+    }
+    .sidebar-link:hover {
+      background: rgba(102, 126, 234, 0.1);
+      transform: translateX(5px);
+    }
+    .sidebar-link.active {
+      background: rgba(102, 126, 234, 0.2);
+      border-left: 4px solid #667eea;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="sidebar w-64 bg-white dark:bg-gray-800 shadow-lg fixed h-full">
+      <div class="p-6">
+        <h2 class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mb-8">
+          <i class="fas fa-bullseye"></i> Study Tracker
+        </h2>
+        <nav class="space-y-2">
+          <a href="dashboard.html" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg text-gray-700 dark:text-gray-300">
+            <i class="fas fa-home w-5"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="students.html" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg text-gray-700 dark:text-gray-300">
+            <i class="fas fa-users w-5"></i>
+            <span>Students</span>
+          </a>
+          <a href="tasks.html" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg text-gray-700 dark:text-gray-300">
+            <i class="fas fa-tasks w-5"></i>
+            <span>Tasks</span>
+          </a>
+          <a href="notes.html" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg text-gray-700 dark:text-gray-300">
+            <i class="fas fa-book w-5"></i>
+            <span>Notes</span>
+          </a>
+          <a href="reports.html" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg text-gray-700 dark:text-gray-300">
+            <i class="fas fa-chart-bar w-5"></i>
+            <span>Reports</span>
+          </a>
+          <a href="attendance.html" class="sidebar-link active flex items-center space-x-3 p-3 rounded-lg text-gray-700 dark:text-gray-300">
+            <i class="fas fa-calendar-check w-5"></i>
+            <span>Attendance</span>
+          </a>
+          <a href="profile.html" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg text-gray-700 dark:text-gray-300">
+            <i class="fas fa-user w-5"></i>
+            <span>Profile</span>
+          </a>
+        </nav>
+      </div>
+      <div class="absolute bottom-0 w-full p-6 border-t dark:border-gray-700">
+        <button onclick="logout()" class="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 ml-64 overflow-y-auto">
+      <header class="bg-white dark:bg-gray-800 shadow-sm p-4 sticky top-0 z-10">
+        <div class="flex justify-between items-center">
+          <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Attendance Dashboard</h1>
+          <button onclick="toggleDarkMode()" class="text-gray-600 dark:text-gray-400">
+            <i class="fas fa-moon dark:hidden"></i>
+            <i class="fas fa-sun hidden dark:inline"></i>
+          </button>
+        </div>
+      </header>
+
+      <div class="p-6">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-6 rounded-xl shadow-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-indigo-100 text-sm mb-1">Today's Status</p>
+                <p class="text-3xl font-bold" id="todayStatus">Present</p>
+              </div>
+              <i class="fas fa-check-circle text-4xl opacity-80"></i>
+            </div>
+          </div>
+
+          <div class="bg-gradient-to-br from-green-500 to-emerald-600 text-white p-6 rounded-xl shadow-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-green-100 text-sm mb-1">Total Time Today</p>
+                <p class="text-3xl font-bold" id="totalTime">0 min</p>
+              </div>
+              <i class="fas fa-clock text-4xl opacity-80"></i>
+            </div>
+          </div>
+
+          <div class="bg-gradient-to-br from-blue-500 to-cyan-600 text-white p-6 rounded-xl shadow-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-blue-100 text-sm mb-1">Monthly Attendance</p>
+                <p class="text-3xl font-bold" id="monthlyAttendance">0%</p>
+              </div>
+              <i class="fas fa-calendar-alt text-4xl opacity-80"></i>
+            </div>
+          </div>
+
+          <div class="bg-gradient-to-br from-pink-500 to-rose-600 text-white p-6 rounded-xl shadow-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-pink-100 text-sm mb-1">Average Work Time</p>
+                <p class="text-3xl font-bold" id="avgWorkTime">0 min</p>
+              </div>
+              <i class="fas fa-chart-line text-4xl opacity-80"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export Buttons -->
+        <div class="mb-6 flex gap-4">
+          <button onclick="exportToCSV()" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition flex items-center gap-2">
+            <i class="fas fa-file-csv"></i> Export CSV
+          </button>
+          <button onclick="exportToPDF()" class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition flex items-center gap-2">
+            <i class="fas fa-file-pdf"></i> Export PDF
+          </button>
+        </div>
+
+        <!-- Daily Summary Table -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
+          <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Daily Summary</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead class="bg-gray-100 dark:bg-gray-700">
+                <tr>
+                  <th class="p-3 text-gray-700 dark:text-gray-300">Date</th>
+                  <th class="p-3 text-gray-700 dark:text-gray-300">Login Time</th>
+                  <th class="p-3 text-gray-700 dark:text-gray-300">Logout Time</th>
+                  <th class="p-3 text-gray-700 dark:text-gray-300">Duration</th>
+                  <th class="p-3 text-gray-700 dark:text-gray-300">Status</th>
+                </tr>
+              </thead>
+              <tbody id="dailyTableBody" class="text-gray-600 dark:text-gray-400">
+                <!-- Table rows will be inserted here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Monthly Summary Table -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+          <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Monthly Summary</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead class="bg-gray-100 dark:bg-gray-700">
+                <tr>
+                  <th class="p-3 text-gray-700 dark:text-gray-300">Month</th>
+                  <th class="p-3 text-gray-700 dark:text-gray-300">Days Present</th>
+                  <th class="p-3 text-gray-700 dark:text-gray-300">Total Hours</th>
+                  <th class="p-3 text-gray-700 dark:text-gray-300">Average/Day</th>
+                  <th class="p-3 text-gray-700 dark:text-gray-300">Attendance %</th>
+                </tr>
+              </thead>
+              <tbody id="monthlyTableBody" class="text-gray-600 dark:text-gray-400">
+                <!-- Table rows will be inserted here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    }
+
+    window.logout = function() {
+      const logoutTime = new Date().toISOString();
+      const today = new Date().toISOString().split('T')[0];
+      const userEmail = localStorage.getItem('currentUserEmail');
+      const userKey = userEmail ? `${userEmail}_${today}` : today;
+      
+      let attendance = JSON.parse(localStorage.getItem('attendance') || '{}');
+      if (attendance[userKey] && attendance[userKey].loginTime) {
+        attendance[userKey].logoutTime = logoutTime;
+        const login = new Date(attendance[userKey].loginTime);
+        const logout = new Date(logoutTime);
+        attendance[userKey].duration = Math.round((logout - login) / 1000 / 60); // minutes
+        localStorage.setItem('attendance', JSON.stringify(attendance));
+      }
+      
+      // Clear all auth data
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('currentUserEmail');
+      localStorage.removeItem('currentUserName');
+      localStorage.removeItem('currentUserRole');
+      
+      window.location.href = 'login.html';
+    };
+
+    function formatTime(dateStr) {
+      if (!dateStr) return 'N/A';
+      return new Date(dateStr).toLocaleTimeString();
+    }
+
+    function formatDuration(minutes) {
+      if (!minutes) return '0 min';
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      if (hours > 0) return `${hours}h ${mins}m`;
+      return `${mins}m`;
+    }
+
+    function loadAttendanceData() {
+      const userEmail = localStorage.getItem('currentUserEmail');
+      const attendance = JSON.parse(localStorage.getItem('attendance') || '{}');
+      const today = new Date().toISOString().split('T')[0];
+      const userKey = userEmail ? `${userEmail}_${today}` : today;
+      
+      // Today's stats - user-specific
+      const todayData = attendance[userKey] || attendance[today] || {};
+      document.getElementById('todayStatus').textContent = todayData.status || 'Absent';
+      
+      // Calculate current session time
+      let totalTimeToday = todayData.duration || 0;
+      if (todayData.loginTime && !todayData.logoutTime) {
+        const login = new Date(todayData.loginTime);
+        const now = new Date();
+        totalTimeToday = Math.round((now - login) / 1000 / 60);
+      }
+      document.getElementById('totalTime').textContent = formatDuration(totalTimeToday);
+
+      // Monthly attendance - user-specific
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+      let daysPresent = 0;
+      let totalDays = 0;
+      let totalMinutes = 0;
+      
+      Object.keys(attendance).forEach(key => {
+        const record = attendance[key];
+        // Check if this record belongs to current user
+        if (!userEmail || record.email === userEmail || key.startsWith(userEmail + '_')) {
+          const recordDate = new Date(record.date || key.split('_')[1] || key);
+          if (recordDate.getMonth() === currentMonth && recordDate.getFullYear() === currentYear) {
+            totalDays++;
+            if (record.status === 'Present') daysPresent++;
+            totalMinutes += record.duration || 0;
+          }
+        }
+      });
+      
+      const monthlyPercent = totalDays > 0 ? Math.round((daysPresent / totalDays) * 100) : 0;
+      document.getElementById('monthlyAttendance').textContent = monthlyPercent + '%';
+
+      // Average work time - user-specific
+      const userRecords = Object.keys(attendance).filter(key => {
+        if (!userEmail) return true;
+        const record = attendance[key];
+        return (record.email === userEmail || key.startsWith(userEmail + '_')) && record.duration > 0;
+      }).map(key => attendance[key]);
+      const avgMinutes = userRecords.length > 0 ? Math.round(totalMinutes / userRecords.length) : 0;
+      document.getElementById('avgWorkTime').textContent = formatDuration(avgMinutes);
+
+      // Daily table - user-specific
+      const dailyBody = document.getElementById('dailyTableBody');
+      const userKeys = Object.keys(attendance).filter(key => {
+        if (!userEmail) return true;
+        const record = attendance[key];
+        return record.email === userEmail || key.startsWith(userEmail + '_');
+      });
+      const sortedDates = userKeys.sort((a, b) => {
+        const dateA = new Date(attendance[a].date || a.split('_')[1] || a);
+        const dateB = new Date(attendance[b].date || b.split('_')[1] || b);
+        return dateB - dateA;
+      }).slice(0, 30);
+      
+      dailyBody.innerHTML = sortedDates.map(key => {
+        const record = attendance[key];
+        const date = record.date || key.split('_')[1] || key;
+        return `
+          <tr class="border-b dark:border-gray-700">
+            <td class="p-3">${new Date(date).toLocaleDateString()}</td>
+            <td class="p-3">${formatTime(record.loginTime)}</td>
+            <td class="p-3">${formatTime(record.logoutTime)}</td>
+            <td class="p-3">${formatDuration(record.duration)}</td>
+            <td class="p-3">
+              <span class="px-3 py-1 rounded-full text-sm ${record.status === 'Present' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'}">
+                ${record.status || 'Absent'}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('') || '<tr><td colspan="5" class="p-3 text-center">No attendance records yet</td></tr>';
+
+      // Monthly table - user-specific
+      const monthlyBody = document.getElementById('monthlyTableBody');
+      const months = {};
+      Object.keys(attendance).forEach(key => {
+        const record = attendance[key];
+        // Check if this record belongs to current user
+        if (!userEmail || record.email === userEmail || key.startsWith(userEmail + '_')) {
+          const recordDate = new Date(record.date || key.split('_')[1] || key);
+          const monthKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
+          if (!months[monthKey]) {
+            months[monthKey] = { days: 0, totalMinutes: 0, daysInMonth: new Date(recordDate.getFullYear(), recordDate.getMonth() + 1, 0).getDate() };
+          }
+          if (record.status === 'Present') months[monthKey].days++;
+          months[monthKey].totalMinutes += record.duration || 0;
+        }
+      });
+
+      monthlyBody.innerHTML = Object.keys(months).sort().reverse().map(monthKey => {
+        const month = months[monthKey];
+        const monthName = new Date(monthKey + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        const avgPerDay = month.days > 0 ? Math.round(month.totalMinutes / month.days) : 0;
+        const percent = Math.round((month.days / month.daysInMonth) * 100);
+        return `
+          <tr class="border-b dark:border-gray-700">
+            <td class="p-3">${monthName}</td>
+            <td class="p-3">${month.days}</td>
+            <td class="p-3">${formatDuration(month.totalMinutes)}</td>
+            <td class="p-3">${formatDuration(avgPerDay)}</td>
+            <td class="p-3">${percent}%</td>
+          </tr>
+        `;
+      }).join('') || '<tr><td colspan="5" class="p-3 text-center">No monthly data yet</td></tr>';
+    }
+
+    function exportToCSV() {
+      const attendance = JSON.parse(localStorage.getItem('attendance') || '{}');
+      let csv = 'Date,Login Time,Logout Time,Duration (minutes),Status\n';
+      
+      Object.keys(attendance).sort().reverse().forEach(date => {
+        const record = attendance[date];
+        csv += `"${date}","${formatTime(record.loginTime)}","${formatTime(record.logoutTime)}","${record.duration || 0}","${record.status || 'Absent'}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `attendance_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportToPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      const attendance = JSON.parse(localStorage.getItem('attendance') || '{}');
+      
+      doc.setFontSize(20);
+      doc.text('Attendance Report', 20, 20);
+      doc.setFontSize(12);
+      doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, 35);
+      
+      let y = 50;
+      doc.setFontSize(14);
+      doc.text('Daily Summary', 20, y);
+      y += 10;
+      doc.setFontSize(10);
+      
+      Object.keys(attendance).sort().reverse().slice(0, 30).forEach(date => {
+        const record = attendance[date];
+        if (y > 280) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(`${date} | ${formatTime(record.loginTime)} - ${formatTime(record.logoutTime)} | ${formatDuration(record.duration)} | ${record.status || 'Absent'}`, 20, y);
+        y += 8;
+      });
+
+      doc.save(`attendance_${new Date().toISOString().split('T')[0]}.pdf`);
+    }
+
+      // Update time every minute - user-specific
+      setInterval(() => {
+        const userEmail = localStorage.getItem('currentUserEmail');
+        const attendance = JSON.parse(localStorage.getItem('attendance') || '{}');
+        const today = new Date().toISOString().split('T')[0];
+        const userKey = userEmail ? `${userEmail}_${today}` : today;
+        const todayData = attendance[userKey] || attendance[today] || {};
+        
+        if (todayData.loginTime && !todayData.logoutTime) {
+          const login = new Date(todayData.loginTime);
+          const now = new Date();
+          const totalTime = Math.round((now - login) / 1000 / 60);
+          document.getElementById('totalTime').textContent = formatDuration(totalTime);
+        }
+      }, 60000);
+
+    // Load theme
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+
+    // Initialize
+    loadAttendanceData();
+  </script>
+</body>
+</html>

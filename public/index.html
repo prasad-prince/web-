@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Study Goal Tracker - Plan Smarter. Track Faster. Achieve More.</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Poppins', 'Inter', sans-serif;
+    }
+    body {
+      scroll-behavior: smooth;
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .hero-image {
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><path fill="%23ffffff" fill-opacity="0.1" d="M0,300 Q300,100 600,300 T1200,300 L1200,600 L0,600 Z"/></svg>') no-repeat center;
+      background-size: cover;
+    }
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    .nav-link-hover {
+      transition: all 0.3s ease;
+    }
+    .nav-link-hover:hover {
+      transform: translateY(-2px);
+      color: #667eea !important;
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-fade-in-up {
+      animation: fadeInUp 0.8s ease-out;
+    }
+    .sticky-nav {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.95);
+    }
+    .dark .sticky-nav {
+      background: rgba(30, 30, 30, 0.95);
+    }
+    .scroll-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #667eea;
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    .scroll-to-top.visible {
+      opacity: 1;
+    }
+    .scroll-to-top:hover {
+      background: #5568d3;
+      transform: translateY(-3px);
+    }
+    .mobile-menu {
+      display: none;
+    }
+    .mobile-menu.active {
+      display: block;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+  <!-- Sticky Navbar -->
+  <nav class="sticky-nav fixed top-0 w-full z-50 shadow-lg transition-all duration-300">
+    <div class="container mx-auto px-4 py-4">
+      <div class="flex justify-between items-center">
+        <a href="index.html" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+          <i class="fas fa-bullseye"></i> Study Goal Tracker
+        </a>
+        <div class="hidden md:flex space-x-6 items-center">
+          <a href="#home" class="nav-link-hover text-gray-700 dark:text-gray-300 font-medium">Home</a>
+          <a href="#features" class="nav-link-hover text-gray-700 dark:text-gray-300 font-medium">Features</a>
+          <a href="#how-it-works" class="nav-link-hover text-gray-700 dark:text-gray-300 font-medium">How It Works</a>
+          <a href="dashboard.html" class="nav-link-hover text-gray-700 dark:text-gray-300 font-medium">Dashboard</a>
+          <a href="profile.html" class="nav-link-hover text-gray-700 dark:text-gray-300 font-medium">Profile</a>
+          <a href="login.html" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all font-medium">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </a>
+          <button onclick="toggleDarkMode()" class="text-gray-700 dark:text-gray-300 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+            <i class="fas fa-moon dark:hidden"></i>
+            <i class="fas fa-sun hidden dark:inline"></i>
+          </button>
+        </div>
+        <button class="md:hidden text-gray-700 dark:text-gray-300 p-2" onclick="toggleMobileMenu()">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+      </div>
+      <!-- Mobile Menu -->
+      <div class="mobile-menu md:hidden mt-4 pb-4">
+        <div class="flex flex-col space-y-3">
+          <a href="#home" class="text-gray-700 dark:text-gray-300 font-medium py-2" onclick="toggleMobileMenu()">Home</a>
+          <a href="#features" class="text-gray-700 dark:text-gray-300 font-medium py-2" onclick="toggleMobileMenu()">Features</a>
+          <a href="#how-it-works" class="text-gray-700 dark:text-gray-300 font-medium py-2" onclick="toggleMobileMenu()">How It Works</a>
+          <a href="dashboard.html" class="text-gray-700 dark:text-gray-300 font-medium py-2">Dashboard</a>
+          <a href="profile.html" class="text-gray-700 dark:text-gray-300 font-medium py-2">Profile</a>
+          <a href="login.html" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-center">Login</a>
+          <button onclick="toggleDarkMode()" class="text-gray-700 dark:text-gray-300 py-2 text-left">
+            <i class="fas fa-moon dark:hidden"></i>
+            <i class="fas fa-sun hidden dark:inline"></i> Toggle Theme
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="home" class="hero-gradient text-white min-h-screen flex items-center justify-center relative overflow-hidden">
+    <div class="hero-image absolute inset-0 opacity-20"></div>
+    <div class="container mx-auto px-4 py-20 relative z-10 mt-16">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div class="text-center md:text-left animate-fade-in-up">
+          <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+            Plan Smarter.<br>
+            Track Faster.<br>
+            <span class="text-yellow-300">Achieve More.</span>
+          </h1>
+          <p class="text-xl md:text-2xl mb-8 text-gray-100 max-w-2xl leading-relaxed">
+            Your all-in-one platform to manage tasks, track attendance, organize notes, and generate insightful reports.
+          </p>
+          <a href="login.html" class="inline-block bg-yellow-400 text-gray-900 px-8 py-4 rounded-xl text-lg font-bold hover:bg-yellow-300 transform hover:scale-105 transition-all shadow-2xl">
+            <i class="fas fa-rocket"></i> Get Started
+          </a>
+        </div>
+        <div class="hidden md:block animate-fade-in-up" style="animation-delay: 0.3s;">
+          <!-- Dashboard Preview Illustration -->
+          <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 shadow-2xl border border-white/20">
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 mb-4">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-bullseye text-white"></i>
+                </div>
+                <div>
+                  <div class="h-3 bg-gray-300 dark:bg-gray-600 rounded w-24 mb-1"></div>
+                  <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg p-3 text-white">
+                  <div class="text-2xl font-bold">12</div>
+                  <div class="text-sm opacity-90">Tasks</div>
+                </div>
+                <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg p-3 text-white">
+                  <div class="text-2xl font-bold">95%</div>
+                  <div class="text-sm opacity-90">Attendance</div>
+                </div>
+                <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg p-3 text-white">
+                  <div class="text-2xl font-bold">8</div>
+                  <div class="text-sm opacity-90">Notes</div>
+                </div>
+                <div class="bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg p-3 text-white">
+                  <div class="text-2xl font-bold">24</div>
+                  <div class="text-sm opacity-90">Students</div>
+                </div>
+              </div>
+            </div>
+            <div class="flex justify-center gap-2">
+              <div class="w-2 h-2 bg-white rounded-full"></div>
+              <div class="w-2 h-2 bg-white/50 rounded-full"></div>
+              <div class="w-2 h-2 bg-white/50 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+      <i class="fas fa-chevron-down text-white text-2xl"></i>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="py-20 bg-white dark:bg-gray-800">
+    <div class="container mx-auto px-4">
+      <h2 class="text-4xl md:text-5xl font-bold text-center mb-4 text-gray-800 dark:text-white">How It Works</h2>
+      <p class="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto text-lg leading-relaxed">
+        Simple, intuitive, and powerful. Get started in minutes and transform how you manage your studies.
+      </p>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="card-hover bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900 dark:to-purple-900 p-8 rounded-2xl shadow-lg">
+          <div class="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center mb-4 mx-auto">
+            <span class="text-white text-2xl font-bold">1</span>
+          </div>
+          <h3 class="text-xl md:text-2xl font-bold text-center mb-3 text-gray-800 dark:text-white">Sign Up</h3>
+          <p class="text-gray-600 dark:text-gray-300 text-center leading-relaxed">Create your account in seconds. Choose your role as Student or Admin.</p>
+        </div>
+        <div class="card-hover bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 p-8 rounded-2xl shadow-lg">
+          <div class="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mb-4 mx-auto">
+            <span class="text-white text-2xl font-bold">2</span>
+          </div>
+          <h3 class="text-xl md:text-2xl font-bold text-center mb-3 text-gray-800 dark:text-white">Start Tracking</h3>
+          <p class="text-gray-600 dark:text-gray-300 text-center leading-relaxed">Login to automatically mark attendance. Track your time and progress.</p>
+        </div>
+        <div class="card-hover bg-gradient-to-br from-pink-50 to-red-50 dark:from-pink-900 dark:to-red-900 p-8 rounded-2xl shadow-lg">
+          <div class="w-16 h-16 bg-pink-600 rounded-full flex items-center justify-center mb-4 mx-auto">
+            <span class="text-white text-2xl font-bold">3</span>
+          </div>
+          <h3 class="text-xl md:text-2xl font-bold text-center mb-3 text-gray-800 dark:text-white">Achieve Goals</h3>
+          <p class="text-gray-600 dark:text-gray-300 text-center leading-relaxed">Manage tasks, organize notes, view reports, and excel in your studies.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-20 bg-gray-50 dark:bg-gray-900">
+    <div class="container mx-auto px-4">
+      <h2 class="text-4xl md:text-5xl font-bold text-center mb-12 text-gray-800 dark:text-white">Powerful Features</h2>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Tasks Card -->
+        <div class="card-hover bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+          <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-lg flex items-center justify-center mb-4">
+            <i class="fas fa-tasks text-indigo-600 dark:text-indigo-400 text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-gray-800 dark:text-white">Tasks</h3>
+          <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Create, assign, and track tasks with deadlines, priorities, and status tracking.</p>
+        </div>
+
+        <!-- Notes Card -->
+        <div class="card-hover bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+          <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mb-4">
+            <i class="fas fa-sticky-note text-purple-600 dark:text-purple-400 text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-gray-800 dark:text-white">Notes</h3>
+          <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Organize study notes with rich text editor, file uploads, and easy downloads.</p>
+        </div>
+
+        <!-- Reports Card -->
+        <div class="card-hover bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+          <div class="w-12 h-12 bg-pink-100 dark:bg-pink-900 rounded-lg flex items-center justify-center mb-4">
+            <i class="fas fa-chart-bar text-pink-600 dark:text-pink-400 text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-gray-800 dark:text-white">Reports</h3>
+          <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Generate comprehensive reports with analytics, charts, and export options.</p>
+        </div>
+
+        <!-- Students Card -->
+        <div class="card-hover bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+          <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-4">
+            <i class="fas fa-users text-green-600 dark:text-green-400 text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-gray-800 dark:text-white">Students</h3>
+          <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Manage student profiles with attendance tracking, performance metrics, and filters.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 dark:bg-gray-900 text-white py-12">
+    <div class="container mx-auto px-4">
+      <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <h4 class="text-xl font-bold mb-4">Study Goal Tracker</h4>
+          <p class="text-gray-400 leading-relaxed">Plan smarter, track faster, achieve more.</p>
+        </div>
+        <div>
+          <h5 class="font-bold mb-4 text-lg">Quick Links</h5>
+          <ul class="space-y-2 text-gray-400">
+            <li><a href="dashboard.html" class="hover:text-white transition underline-offset-2 hover:underline">Dashboard</a></li>
+            <li><a href="tasks.html" class="hover:text-white transition underline-offset-2 hover:underline">Tasks</a></li>
+            <li><a href="notes.html" class="hover:text-white transition underline-offset-2 hover:underline">Notes</a></li>
+            <li><a href="reports.html" class="hover:text-white transition underline-offset-2 hover:underline">Reports</a></li>
+            <li><a href="profile.html" class="hover:text-white transition underline-offset-2 hover:underline">Profile</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="font-bold mb-4 text-lg">Support</h5>
+          <ul class="space-y-2 text-gray-400">
+            <li><a href="contact.html" class="hover:text-white transition underline-offset-2 hover:underline">Contact Us</a></li>
+            <li><a href="#privacy" class="hover:text-white transition underline-offset-2 hover:underline">Privacy Policy</a></li>
+            <li><a href="#about" class="hover:text-white transition underline-offset-2 hover:underline">About</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="font-bold mb-4 text-lg">Connect</h5>
+          <div class="flex space-x-4">
+            <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook text-2xl"></i></a>
+            <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-twitter text-2xl"></i></a>
+            <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-linkedin text-2xl"></i></a>
+            <a href="https://github.com" target="_blank" class="text-gray-400 hover:text-white transition"><i class="fab fa-github text-2xl"></i></a>
+          </div>
+        </div>
+      </div>
+      <div class="border-t border-gray-700 pt-8 text-center">
+        <p class="text-gray-400 text-lg">
+          Made with <i class="fas fa-heart text-red-500"></i> by Nimesh, Vamshi, Harsh, Prince & Om
+        </p>
+        <p class="text-gray-400 mt-2">&copy; 2025 Study Goal Tracker. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll to Top Button -->
+  <button onclick="scrollToTop()" class="scroll-to-top" id="scrollToTopBtn">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <script>
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    }
+
+    function toggleMobileMenu() {
+      const menu = document.querySelector('.mobile-menu');
+      menu.classList.toggle('active');
+    }
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Show/hide scroll to top button
+    window.addEventListener('scroll', function() {
+      const btn = document.getElementById('scrollToTopBtn');
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    // Load saved theme
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

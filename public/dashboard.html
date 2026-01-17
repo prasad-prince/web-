@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard - Study Goal Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * {
+      font-family: 'Poppins', 'Inter', sans-serif;
+    }
+    .sidebar {
+      transition: transform 0.3s ease;
+      will-change: transform;
+    }
+    .sidebar-link {
+      transition: all 0.3s ease;
+    }
+    .sidebar-link:hover {
+      background: rgba(102, 126, 234, 0.1);
+      transform: translateX(5px);
+    }
+    .sidebar-link.active {
+      background: rgba(102, 126, 234, 0.2);
+      border-left: 4px solid #667eea;
+    }
+    /* Mobile off-canvas sidebar styles */
+    .sidebar-open {
+      transform: translateX(0) !important;
+    }
+    .sidebar-closed {
+      transform: translateX(-100%) !important;
+    }
+    /* overlay for mobile */
+    .mobile-overlay {
+      transition: opacity 0.2s ease;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-gray-800 shadow-lg h-full transform -translate-x-full md:translate-x-0 md:static md:inset-auto md:transform-none">
+      <div class="p-6">
+        <h2 class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mb-8">
+          <i class="fas fa-bullseye"></i> Study Tracker
+        </h2>
+        <nav class="space-y-2">
+          <a href="dashboard.html" class="sidebar-link active flex items-center space-x-3 p-3 rounded-lg text-gray-700 dark:text-gray-300">
+            <i class="fas fa-home w-5"></i><span>Dashboard</span>
+          </a>
+          <a href="students.html" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg text-gray-700 dark:text-gray-300">
+            <i class="fas fa-users w-5"></i><span>Students</span>
+          </a>
+          <a href="tasks.html" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg text-gray-700 dark:text-gray-300">
+            <i class="fas fa-tasks w-5"></i><span>Tasks</span>
+          </a>
+          <a href="notes.html" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg text-gray-700 dark:text-gray-300">
+            <i class="fas fa-book w-5"></i><span>Notes</span>
+          </a>
+          <a href="reports.html" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg text-gray-700 dark:text-gray-300">
+            <i class="fas fa-chart-bar w-5"></i><span>Reports</span>
+          </a>
+          <a href="attendance.html" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg text-gray-700 dark:text-gray-300">
+            <i class="fas fa-calendar-check w-5"></i><span>Attendance</span>
+          </a>
+          <a href="profile.html" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg text-gray-700 dark:text-gray-300">
+            <i class="fas fa-user w-5"></i><span>Profile</span>
+          </a>
+          <a href="calculator.html" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg text-gray-700 dark:text-gray-300">
+            <i class="fas fa-calculator w-5"></i><span>Calculator</span>
+          </a>
+          <a href="assistant.html" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg text-gray-700 dark:text-gray-300">
+            <i class="fas fa-robot w-5"></i><span>AI Assistant</span>
+          </a>
+        </nav>
+      </div>
+      <div class="absolute bottom-0 w-full p-6 border-t dark:border-gray-700">
+        <button id="logoutBtn" class="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Mobile overlay -->
+    <div id="mobileOverlay" class="mobile-overlay fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto">
+      <!-- Top Bar -->
+      <header class="bg-white dark:bg-gray-800 shadow-sm p-4 sticky top-0 z-20">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center md:space-x-4">
+            <!-- Mobile menu button -->
+            <button id="mobileMenuBtn" class="md:hidden text-gray-600 dark:text-gray-400 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700" aria-controls="sidebar" aria-expanded="false">
+              <i class="fas fa-bars"></i>
+            </button>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Dashboard</h1>
+          </div>
+          <div class="flex items-center space-x-4">
+            <span class="text-gray-600 dark:text-gray-400" id="currentTime"></span>
+            <button id="themeToggleBtn" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-2 rounded">
+              <i id="iconMoon" class="fas fa-moon"></i>
+              <i id="iconSun" class="fas fa-sun hidden"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Role Badge -->
+      <div class="p-4 bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="px-3 py-1 bg-indigo-600 text-white rounded-full text-sm font-semibold" id="roleBadge">
+              <i class="fas fa-user-graduate"></i> Student
+            </span>
+            <span class="text-gray-600 dark:text-gray-400" id="userName">Welcome!</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="p-6">
+        <!-- Student View -->
+        <div id="studentView">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 dark:text-gray-400 text-sm">My Tasks</p>
+                  <p class="text-3xl font-bold text-gray-800 dark:text-white" id="totalTasks">0</p>
+                </div>
+                <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-tasks text-indigo-600 dark:text-indigo-400 text-xl"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 dark:text-gray-400 text-sm">Completed</p>
+                  <p class="text-3xl font-bold text-gray-800 dark:text-white" id="completedTasks">0</p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-check-circle text-green-600 dark:text-green-400 text-xl"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 dark:text-gray-400 text-sm">My Notes</p>
+                  <p class="text-3xl font-bold text-gray-800 dark:text-white" id="notesCount">0</p>
+                </div>
+                <div class="w-12 h-12 bg-pink-100 dark:bg-pink-900 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-book text-pink-600 dark:text-pink-400 text-xl"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 dark:text-gray-400 text-sm">Attendance</p>
+                  <p class="text-3xl font-bold text-gray-800 dark:text-white" id="attendancePercent">0%</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-calendar-check text-blue-600 dark:text-blue-400 text-xl"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Teacher/Admin View -->
+        <div id="teacherView" style="display: none;">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 dark:text-gray-400 text-sm">Total Students</p>
+                  <p class="text-3xl font-bold text-gray-800 dark:text-white" id="totalStudents">24</p>
+                </div>
+                <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-users text-indigo-600 dark:text-indigo-400 text-xl"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 dark:text-gray-400 text-sm">Avg Attendance</p>
+                  <p class="text-3xl font-bold text-gray-800 dark:text-white" id="avgAttendance">92%</p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-chart-line text-green-600 dark:text-green-400 text-xl"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 dark:text-gray-400 text-sm">Tasks Assigned</p>
+                  <p class="text-3xl font-bold text-gray-800 dark:text-white" id="tasksAssigned">45</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-tasks text-purple-600 dark:text-purple-400 text-xl"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 dark:text-gray-400 text-sm">Study Materials</p>
+                  <p class="text-3xl font-bold text-gray-800 dark:text-white" id="studyMaterials">12</p>
+                </div>
+                <div class="w-12 h-12 bg-pink-100 dark:bg-pink-900 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-file-alt text-pink-600 dark:text-pink-400 text-xl"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bars (Student Only) -->
+        <div id="studentProgress" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+            <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-white">Task Progress</h3>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-6">
+              <div class="bg-indigo-600 h-6 rounded-full flex items-center justify-center text-white text-sm font-medium transition-all duration-1000" id="taskProgress" style="width: 0%">0%</div>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+            <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-white">Weekly Goal</h3>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-6">
+              <div class="bg-green-600 h-6 rounded-full flex items-center justify-center text-white text-sm font-medium transition-all duration-1000" id="weeklyProgress" style="width: 0%">0%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Teacher Stats Section -->
+        <div id="teacherStats" style="display: none;" class="mb-6">
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+            <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-white">Class Overview</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="text-center p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">24</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Total Students</div>
+              </div>
+              <div class="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div class="text-2xl font-bold text-green-600 dark:text-green-400">92%</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Average Attendance</div>
+              </div>
+              <div class="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">45</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Active Tasks</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg mb-6">
+          <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-white">
+            <span id="chartTitle">Task Completion Trend</span>
+          </h3>
+          <canvas id="taskChart" style="max-height: 300px;"></canvas>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ===== Authentication Check =====
+    function checkAuth() {
+      const token = localStorage.getItem('authToken');
+      const userEmail = localStorage.getItem('currentUserEmail');
+      
+      if (!token || !userEmail) {
+        // Not logged in, redirect to login page
+        window.location.href = 'login.html';
+        return false;
+      }
+      
+      // Optional: Verify user exists in user database
+      const users = JSON.parse(localStorage.getItem('studytracker_users') || '{}');
+      if (!users[userEmail]) {
+        // User doesn't exist anymore
+        localStorage.clear();
+        window.location.href = 'login.html';
+        return false;
+      }
+      
+      return true;
+    }
+
+    // ===== Dashboard Functions =====
+    function logout() {
+      try {
+        const logoutTime = new Date().toISOString();
+        const today = logoutTime.split('T')[0];
+        const userEmail = localStorage.getItem('currentUserEmail');
+
+        if (userEmail) {
+          // Update attendance record
+          const attendanceRaw = localStorage.getItem('attendance') || '{}';
+          const attendance = JSON.parse(attendanceRaw);
+          const userKey = `${userEmail}_${today}`;
+
+          if (attendance[userKey]?.loginTime) {
+            const login = new Date(attendance[userKey].loginTime);
+            const logout = new Date(logoutTime);
+            attendance[userKey].logoutTime = logoutTime;
+            attendance[userKey].duration = Math.round((logout - login) / 60000); // minutes
+            localStorage.setItem('attendance', JSON.stringify(attendance));
+          }
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+      } finally {
+        // Clear session and redirect
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUserEmail');
+        localStorage.removeItem('currentUserName');
+        localStorage.removeItem('currentUserRole');
+        window.location.href = 'login.html';
+      }
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+
+      // Update icons
+      const iconMoon = document.getElementById('iconMoon');
+      const iconSun = document.getElementById('iconSun');
+      if (iconMoon && iconSun) {
+        iconMoon.classList.toggle('hidden', isDark);
+        iconSun.classList.toggle('hidden', !isDark);
+      }
+
+      // Re-init chart for theme colors
+      if (window.chartInstance) {
+        window.chartInstance.destroy();
+        window.chartInstance = null;
+      }
+      setTimeout(initChart, 120);
+    }
+
+    function loadStats() {
+      const userRole = localStorage.getItem('currentUserRole') || 'student';
+      const userName = localStorage.getItem('currentUserName') || 'User';
+      const userEmail = localStorage.getItem('currentUserEmail') || '';
+      const isAdmin = userRole === 'admin' || userRole === 'teacher';
+
+      // Update role badge and username
+      const roleBadge = document.getElementById('roleBadge');
+      const userNameEl = document.getElementById('userName');
+      
+      if (roleBadge) {
+        if (userRole === 'admin') {
+          roleBadge.innerHTML = '<i class="fas fa-user-shield"></i> Administrator';
+          roleBadge.className = 'px-3 py-1 bg-purple-600 text-white rounded-full text-sm font-semibold';
+        } else if (userRole === 'teacher') {
+          roleBadge.innerHTML = '<i class="fas fa-chalkboard-teacher"></i> Teacher';
+          roleBadge.className = 'px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-semibold';
+        } else {
+          roleBadge.innerHTML = '<i class="fas fa-user-graduate"></i> Student';
+          roleBadge.className = 'px-3 py-1 bg-indigo-600 text-white rounded-full text-sm font-semibold';
+        }
+      }
+      
+      if (userNameEl) {
+        userNameEl.textContent = `Welcome, ${userName}!`;
+      }
+
+      // Show/hide views based on role
+      const studentView = document.getElementById('studentView');
+      const teacherView = document.getElementById('teacherView');
+      const studentProgress = document.getElementById('studentProgress');
+      const teacherStats = document.getElementById('teacherStats');
+      const chartTitle = document.getElementById('chartTitle');
+
+      if (isAdmin) {
+        if (studentView) studentView.style.display = 'none';
+        if (teacherView) teacherView.style.display = 'block';
+        if (studentProgress) studentProgress.style.display = 'none';
+        if (teacherStats) teacherStats.style.display = 'block';
+        if (chartTitle) chartTitle.textContent = 'Class Performance Overview';
+      } else {
+        if (studentView) studentView.style.display = 'block';
+        if (teacherView) teacherView.style.display = 'none';
+        if (teacherStats) teacherStats.style.display = 'none';
+        if (studentProgress) studentProgress.style.display = 'grid';
+        if (chartTitle) chartTitle.textContent = 'Task Completion Trend';
+      }
+
+      // Load user-specific data
+      if (!isAdmin) {
+        // Student stats
+        const tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
+        const notes = JSON.parse(localStorage.getItem('userNotes') || '[]');
+        const attendance = JSON.parse(localStorage.getItem('attendance') || '{}');
+
+        const totalTasks = tasks.length;
+        const completedTasks = tasks.filter(t => t && t.status === 'Done').length || 0;
+        const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+        const notesCount = notes.length;
+        const weeklyProgress = Math.min(Math.round((completedTasks / 10) * 100), 100);
+
+        // Calculate monthly attendance - user-specific
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        let daysPresent = 0;
+        let totalDays = 0;
+
+        if (userEmail) {
+          Object.keys(attendance).forEach(key => {
+            const record = attendance[key];
+            if (!record) return;
+            
+            // Check if this record belongs to current user
+            const belongsToUser = (record.email === userEmail) || key.startsWith(userEmail + '_');
+            if (!belongsToUser) return;
+            
+            try {
+              const recordDate = record.date ? new Date(record.date) : new Date((key.split('_')[1] || ''));
+              if (recordDate.getMonth() === currentMonth && recordDate.getFullYear() === currentYear) {
+                totalDays++;
+                if (record.status === 'Present') daysPresent++;
+              }
+            } catch (e) {
+              console.error('Date parsing error:', e);
+            }
+          });
+        }
+
+        const monthlyAttendance = totalDays > 0 ? Math.round((daysPresent / totalDays) * 100) : 0;
+
+        // Update UI elements
+        const totalEl = document.getElementById('totalTasks');
+        const compEl = document.getElementById('completedTasks');
+        const notesEl = document.getElementById('notesCount');
+        const attEl = document.getElementById('attendancePercent');
+
+        if (totalEl) totalEl.textContent = totalTasks;
+        if (compEl) compEl.textContent = completedTasks;
+        if (notesEl) notesEl.textContent = notesCount;
+        if (attEl) attEl.textContent = monthlyAttendance + '%';
+
+        // Animate progress bars
+        setTimeout(() => {
+          const tp = document.getElementById('taskProgress');
+          const wp = document.getElementById('weeklyProgress');
+          if (tp) {
+            tp.style.width = completionRate + '%';
+            tp.textContent = completionRate + '%';
+          }
+          if (wp) {
+            wp.style.width = weeklyProgress + '%';
+            wp.textContent = weeklyProgress + '%';
+          }
+        }, 100);
+      }
+    }
+
+    function initChart() {
+      const canvas = document.getElementById('taskChart');
+      if (!canvas) return;
+
+      const userRole = localStorage.getItem('currentUserRole') || 'student';
+      const isAdmin = userRole === 'admin' || userRole === 'teacher';
+
+      if (window.chartInstance) {
+        window.chartInstance.destroy();
+        window.chartInstance = null;
+      }
+
+      const ctx = canvas.getContext('2d');
+
+      try {
+        if (isAdmin) {
+          // Teacher/Admin chart
+          window.chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+              datasets: [{
+                label: 'Class Average Score',
+                data: [85, 78, 92, 88],
+                backgroundColor: '#4CAF50',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  max: 100,
+                  ticks: {
+                    color: document.documentElement.classList.contains('dark') ? '#f3f4f6' : '#374151'
+                  }
+                },
+                x: {
+                  ticks: {
+                    color: document.documentElement.classList.contains('dark') ? '#f3f4f6' : '#374151'
+                  }
+                }
+              },
+              plugins: {
+                legend: {
+                  labels: {
+                    color: document.documentElement.classList.contains('dark') ? '#f3f4f6' : '#374151'
+                  }
+                }
+              }
+            }
+          });
+        } else {
+          // Student chart
+          const tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
+          const completedTasks = tasks.filter(t => t && t.status === 'Done').length || 0;
+          const pendingTasks = Math.max(tasks.length - completedTasks, 0);
+
+          window.chartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: ['Completed', 'Pending'],
+              datasets: [{
+                data: [completedTasks, pendingTasks],
+                backgroundColor: ['#4CAF50', '#ff9800'],
+                borderWidth: 2,
+                borderColor: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff'
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              plugins: {
+                legend: {
+                  position: 'bottom',
+                  labels: {
+                    color: document.documentElement.classList.contains('dark') ? '#f3f4f6' : '#374151',
+                    padding: 15,
+                    font: { size: 14 }
+                  }
+                }
+              }
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Chart init error:', err);
+      }
+    }
+
+    function updateTime() {
+      const now = new Date();
+      const el = document.getElementById('currentTime');
+      if (el) el.textContent = now.toLocaleTimeString();
+    }
+
+    // ===== Mobile menu functions =====
+    function isMobile() {
+      return window.innerWidth < 768;
+    }
+
+    function showOverlay() {
+      const overlay = document.getElementById('mobileOverlay');
+      if (overlay) {
+        overlay.classList.remove('hidden');
+        overlay.classList.add('block');
+        overlay.addEventListener('click', closeSidebar);
+      }
+    }
+
+    function hideOverlay() {
+      const overlay = document.getElementById('mobileOverlay');
+      if (overlay) {
+        overlay.classList.remove('block');
+        overlay.classList.add('hidden');
+        overlay.removeEventListener('click', closeSidebar);
+      }
+    }
+
+    function openSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+      if (sidebar) {
+        sidebar.classList.remove('sidebar-closed');
+        sidebar.classList.add('sidebar-open');
+        showOverlay();
+        document.documentElement.classList.add('overflow-hidden');
+        document.body.classList.add('overflow-hidden');
+        if (mobileBtn) mobileBtn.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    function closeSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+      if (sidebar && isMobile()) {
+        sidebar.classList.remove('sidebar-open');
+        sidebar.classList.add('sidebar-closed');
+        hideOverlay();
+        document.documentElement.classList.remove('overflow-hidden');
+        document.body.classList.remove('overflow-hidden');
+        if (mobileBtn) mobileBtn.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      if (!sidebar || !isMobile()) return;
+      if (sidebar.classList.contains('sidebar-open')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    }
+
+    // ===== Initialize Dashboard =====
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check authentication
+      if (!checkAuth()) {
+        return; // Will redirect to login
+      }
+
+      // Initialize theme
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+
+      // Update theme icons
+      const iconMoon = document.getElementById('iconMoon');
+      const iconSun = document.getElementById('iconSun');
+      if (iconMoon && iconSun) {
+        const isDark = document.documentElement.classList.contains('dark');
+        iconMoon.classList.toggle('hidden', isDark);
+        iconSun.classList.toggle('hidden', !isDark);
+      }
+
+      // Load user stats and data
+      loadStats();
+      
+      // Initialize chart after a delay to ensure DOM is ready
+      setTimeout(initChart, 300);
+      
+      // Start time updater
+      updateTime();
+      setInterval(updateTime, 1000);
+
+      // Attach event handlers
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          logout();
+        });
+      }
+
+      const themeBtn = document.getElementById('themeToggleBtn');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', toggleDarkMode);
+      }
+
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+      if (mobileBtn) {
+        mobileBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          toggleSidebar();
+        });
+        mobileBtn.setAttribute('aria-controls', 'sidebar');
+        mobileBtn.setAttribute('aria-expanded', 'false');
+      }
+
+      // Close sidebar on nav link click (mobile)
+      const sidebarLinks = document.querySelectorAll('.sidebar-link');
+      sidebarLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          if (isMobile()) setTimeout(closeSidebar, 50);
+        });
+      });
+
+      // Close on Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeSidebar();
+      });
+
+      // Initial sidebar state for mobile
+      if (isMobile()) {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) sidebar.classList.add('sidebar-closed');
+      }
+
+      // Resize handler
+      window.addEventListener('resize', () => {
+        if (window.innerWidth >= 768) {
+          const sidebar = document.getElementById('sidebar');
+          if (sidebar) {
+            sidebar.classList.remove('sidebar-closed');
+            sidebar.classList.add('sidebar-open');
+          }
+          hideOverlay();
+          document.documentElement.classList.remove('overflow-hidden');
+          document.body.classList.remove('overflow-hidden');
+        } else {
+          const sidebar = document.getElementById('sidebar');
+          if (sidebar && !sidebar.classList.contains('sidebar-open')) {
+            sidebar.classList.add('sidebar-closed');
+          }
+        }
+      });
+
+      // Initialize demo data if needed
+      initializeDemoData();
+    });
+
+    function initializeDemoData() {
+      // Initialize tasks if empty
+      if (!localStorage.getItem('userTasks')) {
+        const demoTasks = [
+          { id: 1, title: 'Complete Math Assignment', status: 'Pending', dueDate: '2024-01-20' },
+          { id: 2, title: 'Read Chapter 5 of Physics', status: 'Done', dueDate: '2024-01-18' },
+          { id: 3, title: 'Prepare for Chemistry Test', status: 'Pending', dueDate: '2024-01-22' }
+        ];
+        localStorage.setItem('userTasks', JSON.stringify(demoTasks));
+      }
+
+      // Initialize notes if empty
+      if (!localStorage.getItem('userNotes')) {
+        const demoNotes = [
+          { id: 1, title: 'Physics Formulas', content: 'Important formulas for exam', date: '2024-01-15' },
+          { id: 2, title: 'Math Theorems', content: 'Key theorems to remember', date: '2024-01-16' }
+        ];
+        localStorage.setItem('userNotes', JSON.stringify(demoNotes));
+      }
+    }
+  </script>
+</body>
+</html>

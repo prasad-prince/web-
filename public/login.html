@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In | StudyTracker</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --primary-hover: #3a56d4;
+      --success-color: #2ecc71;
+      --error-color: #e74c3c;
+      --warning-color: #f39c12;
+      --text-primary: #2d3436;
+      --text-secondary: #636e72;
+      --text-light: #b2bec3;
+      --bg-light: #f8f9fa;
+      --border-color: #dfe6e9;
+      --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --shadow-medium: 0 6px 20px rgba(0, 0, 0, 0.12);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --body-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    /* Dark mode variables */
+    [data-theme="dark"] {
+      --primary-color: #5a7dff;
+      --primary-hover: #6d8cff;
+      --success-color: #2ecc71;
+      --error-color: #ff6b6b;
+      --warning-color: #f39c12;
+      --text-primary: #f8f9fa;
+      --text-secondary: #adb5bd;
+      --text-light: #6c757d;
+      --bg-light: #1a1a1a;
+      --border-color: #495057;
+      --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.25);
+      --shadow-medium: 0 6px 20px rgba(0, 0, 0, 0.35);
+      --card-bg: rgba(30, 30, 35, 0.95);
+      --body-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    body {
+      background: var(--body-gradient);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+    }
+
+    .login-container {
+      max-width: 420px;
+      width: 100%;
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: var(--shadow-medium);
+      padding: 40px 32px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      position: relative;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, var(--primary-color), #7209b7);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      color: white;
+      font-size: 24px;
+    }
+
+    .login-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .login-header p {
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+
+    .required::after {
+      content: " *";
+      color: var(--error-color);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 16px;
+      transition: all 0.2s ease;
+      background: var(--card-bg);
+      color: var(--text-primary);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+    }
+
+    .form-control.error {
+      border-color: var(--error-color);
+    }
+
+    .form-control.success {
+      border-color: var(--success-color);
+    }
+
+    .error-message {
+      color: var(--error-color);
+      font-size: 13px;
+      margin-top: 6px;
+      display: none;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .error-message.show {
+      display: flex;
+    }
+
+    .helper-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .password-wrapper {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      min-width: 120px;
+      justify-content: flex-end;
+    }
+
+    .password-toggle:focus {
+      outline: 3px solid var(--primary-color);
+      outline-offset: 2px;
+    }
+
+    .password-toggle:hover {
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--primary-color);
+    }
+
+    [data-theme="dark"] .password-toggle:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .password-toggle[aria-pressed="true"] .toggle-text {
+      display: none;
+    }
+
+    .password-toggle[aria-pressed="false"] .toggle-text-hide {
+      display: none;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--primary-color), #7209b7);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin: 24px 0 16px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, var(--primary-hover), #6407a3);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-light);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-spinner {
+      display: none;
+      animation: spin 1s linear infinite;
+    }
+
+    .btn-primary.loading .btn-spinner {
+      display: inline-block;
+    }
+
+    .btn-primary.loading .btn-text {
+      display: none;
+    }
+
+    .secondary-links {
+      text-align: center;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .secondary-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      margin: 0 12px;
+      transition: color 0.2s ease;
+    }
+
+    .secondary-links a:hover {
+      color: var(--primary-color);
+      text-decoration: underline;
+    }
+
+    .create-account {
+      display: block;
+      text-align: center;
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+      margin-top: 8px;
+    }
+
+    .create-account:hover {
+      text-decoration: underline;
+    }
+
+    .global-error {
+      background: #ffebee;
+      border: 1px solid #ffcdd2;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    [data-theme="dark"] .global-error {
+      background: rgba(229, 57, 53, 0.1);
+      border-color: rgba(229, 57, 53, 0.3);
+    }
+
+    .global-error.show {
+      display: block;
+    }
+
+    .global-error h3 {
+      color: var(--error-color);
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .global-error p {
+      color: #c62828;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    [data-theme="dark"] .global-error p {
+      color: #ff8a80;
+    }
+
+    .global-error-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .global-error-actions a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .global-error-actions a:hover {
+      text-decoration: underline;
+    }
+
+    .back-home {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 1000;
+      padding: 10px 15px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    .back-home:hover {
+      transform: translateX(-5px);
+      color: #f0f0f0;
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* Dark Mode Toggle */
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .theme-toggle:hover {
+      background: rgba(0, 0, 0, 0.05);
+      transform: rotate(30deg);
+    }
+
+    [data-theme="dark"] .theme-toggle:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .theme-toggle .fa-sun {
+      display: none;
+    }
+
+    [data-theme="dark"] .theme-toggle .fa-sun {
+      display: block;
+    }
+
+    [data-theme="dark"] .theme-toggle .fa-moon {
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 32px 24px;
+      }
+      .login-header h1 {
+        font-size: 24px;
+      }
+      .password-toggle {
+        position: static;
+        transform: none;
+        margin-top: 8px;
+        width: 100%;
+        justify-content: center;
+      }
+      .back-home {
+        top: 10px;
+        left: 10px;
+        font-size: 14px;
+        padding: 8px 12px;
+      }
+      .theme-toggle {
+        top: 15px;
+        right: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-home">
+    <i class="fas fa-arrow-left"></i> <span>Back to Home</span>
+  </a>
+
+  <div class="login-container">
+    <!-- Global Error Banner -->
+    <div class="global-error" id="globalError">
+      <h3><i class="fas fa-exclamation-circle"></i> Something went wrong</h3>
+      <p id="globalErrorMessage">We couldn't sign you in. Please try again.</p>
+      <div class="global-error-actions">
+        <a href="#" id="retryBtn">Try again</a>
+        <a href="#" id="forgotPasswordBtn">Forgot password?</a>
+        <a href="mailto:support@studytracker.com">Contact support</a>
+      </div>
+    </div>
+
+    <div class="login-card">
+      <!-- Dark Mode Toggle Button -->
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <i class="fas fa-moon"></i>
+        <i class="fas fa-sun"></i>
+      </button>
+
+      <div class="login-header">
+        <div class="logo">
+          <i class="fas fa-graduation-cap"></i>
+        </div>
+        <h1>Sign in to StudyTracker</h1>
+        <p>Access your personalized learning dashboard</p>
+      </div>
+
+      <form id="loginForm" novalidate>
+        <!-- Email Field -->
+        <div class="form-group">
+          <label for="email" class="form-label required">Email address</label>
+          <input 
+            type="email" 
+            id="email" 
+            class="form-control" 
+            placeholder="you@example.com" 
+            required
+            autocomplete="email"
+          >
+          <div class="error-message" id="emailError">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="emailErrorText"></span>
+          </div>
+        </div>
+
+        <!-- Password Field -->
+        <div class="form-group">
+          <label for="password" class="form-label required">Password</label>
+          <div class="password-wrapper">
+            <input 
+              type="password" 
+              id="password" 
+              class="form-control" 
+              placeholder="Enter your password" 
+              required
+              autocomplete="current-password"
+            >
+            <button 
+              type="button" 
+              class="password-toggle"
+              id="passwordToggle"
+              aria-label="Show password"
+              aria-pressed="false"
+              tabindex="0"
+            >
+              <i class="fas fa-eye"></i>
+              <span class="toggle-text">Show password</span>
+              <span class="toggle-text-hide">Hide password</span>
+            </button>
+          </div>
+          
+          <div class="error-message" id="passwordError">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="passwordErrorText"></span>
+          </div>
+        </div>
+
+        <!-- Primary CTA -->
+        <button type="submit" class="btn-primary" id="submitBtn">
+          <span class="btn-text">Sign in to Dashboard</span>
+          <i class="fas fa-spinner btn-spinner"></i>
+        </button>
+
+        <!-- Secondary Links -->
+        <div class="secondary-links">
+          <a href="#" id="forgotPasswordLink">Forgot password?</a>
+          <a href="#" id="helpLink">Need help?</a>
+        </div>
+
+        <!-- Create Account Link -->
+        <!-- From: -->
+        <a href="register.html" class="create-account">Don't have an account? Create one</a>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ===== Theme Management =====
+    function initTheme() {
+      // Check for saved theme preference or respect OS preference
+      const savedTheme = localStorage.getItem('studytracker-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      
+      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    }
+
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('studytracker-theme', newTheme);
+      
+      // Add animation class for smooth transition
+      document.body.classList.add('theme-transition');
+      setTimeout(() => {
+        document.body.classList.remove('theme-transition');
+      }, 300);
+    }
+
+    // ===== User Management Functions =====
+    function getUsers() {
+      try {
+        return JSON.parse(localStorage.getItem('studytracker_users')) || {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveUsers(users) {
+      localStorage.setItem('studytracker_users', JSON.stringify(users));
+    }
+
+    // Initialize demo users if none exist
+    function initDemoUsers() {
+      const users = getUsers();
+      if (Object.keys(users).length === 0) {
+        const demoUsers = {
+          'student@example.com': {
+            name: 'John Student',
+            email: 'student@example.com',
+            password: 'student123',
+            role: 'student',
+            createdAt: new Date().toISOString()
+          },
+          'teacher@example.com': {
+            name: 'Jane Teacher',
+            email: 'teacher@example.com',
+            password: 'teacher123',
+            role: 'teacher',
+            createdAt: new Date().toISOString()
+          },
+          'admin@example.com': {
+            name: 'Admin User',
+            email: 'admin@example.com',
+            password: 'admin123',
+            role: 'admin',
+            createdAt: new Date().toISOString()
+          }
+        };
+        saveUsers(demoUsers);
+      }
+    }
+
+    function authenticateUser(email, password) {
+      const users = getUsers();
+      const user = users[email];
+      
+      if (!user) {
+        return { success: false, message: 'User not found' };
+      }
+      
+      if (user.password !== password) {
+        return { success: false, message: 'Incorrect password' };
+      }
+      
+      // Generate auth token
+      const token = 'tok_' + Math.random().toString(36).slice(2) + '_' + Date.now();
+      
+      // Save session data
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('currentUserEmail', email);
+      localStorage.setItem('currentUserName', user.name);
+      localStorage.setItem('currentUserRole', user.role);
+      
+      // Track attendance
+      trackAttendance(email);
+      
+      return { success: true, user: user };
+    }
+
+    function trackAttendance(email) {
+      const loginTime = new Date().toISOString();
+      const today = new Date().toISOString().split('T')[0];
+      const userKey = `${email}_${today}`;
+      
+      let attendance = JSON.parse(localStorage.getItem('attendance') || '{}');
+      
+      if (!attendance[userKey]) {
+        attendance[userKey] = {
+          email: email,
+          date: today,
+          loginTime: loginTime,
+          logoutTime: null,
+          duration: 0,
+          status: 'Present'
+        };
+        localStorage.setItem('attendance', JSON.stringify(attendance));
+      }
+    }
+
+    // ===== DOM Elements =====
+    const loginForm = document.getElementById('loginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const passwordToggle = document.getElementById('passwordToggle');
+    const submitBtn = document.getElementById('submitBtn');
+    const globalError = document.getElementById('globalError');
+    const retryBtn = document.getElementById('retryBtn');
+    const themeToggle = document.getElementById('themeToggle');
+
+    // ===== Form Functions =====
+    function showError(field, message) {
+      const errorElement = document.getElementById(`${field}Error`);
+      const errorText = document.getElementById(`${field}ErrorText`);
+      const input = document.getElementById(field);
+      
+      errorText.textContent = message;
+      errorElement.classList.add('show');
+      input.classList.add('error');
+    }
+
+    function showSuccess(field) {
+      const errorElement = document.getElementById(`${field}Error`);
+      const input = document.getElementById(field);
+      
+      errorElement.classList.remove('show');
+      input.classList.remove('error');
+    }
+
+    function togglePasswordVisibility() {
+      const isPressed = passwordToggle.getAttribute('aria-pressed') === 'true';
+      const newState = !isPressed;
+      
+      passwordToggle.setAttribute('aria-pressed', newState);
+      passwordToggle.setAttribute('aria-label', newState ? 'Hide password' : 'Show password');
+      passwordInput.type = newState ? 'text' : 'password';
+    }
+
+    async function handleSubmit(event) {
+      event.preventDefault();
+      
+      globalError.classList.remove('show');
+      
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      
+      // Clear previous errors
+      showSuccess('email');
+      showSuccess('password');
+      
+      // Basic validation
+      let isValid = true;
+      
+      if (!email) {
+        showError('email', 'Email is required');
+        emailInput.focus();
+        isValid = false;
+      }
+      
+      if (!password) {
+        showError('password', 'Password is required');
+        if (isValid) passwordInput.focus();
+        isValid = false;
+      }
+      
+      if (!isValid) {
+        return;
+      }
+      
+      // Show loading state
+      submitBtn.disabled = true;
+      submitBtn.classList.add('loading');
+      
+      try {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // Authenticate user
+        const result = authenticateUser(email, password);
+        
+        if (result.success) {
+          // Show success message
+          showSuccess('email');
+          showSuccess('password');
+          
+          // Redirect to dashboard
+          window.location.href = 'dashboard.html';
+        } else {
+          throw new Error(result.message);
+        }
+        
+      } catch (error) {
+        // Show global error
+        const errorMsg = document.getElementById('globalErrorMessage');
+        errorMsg.textContent = error.message;
+        globalError.classList.add('show');
+        
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+      }
+    }
+
+    // ===== Event Listeners =====
+    passwordToggle.addEventListener('click', togglePasswordVisibility);
+    passwordToggle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        togglePasswordVisibility();
+      }
+    });
+
+    themeToggle.addEventListener('click', toggleTheme);
+    themeToggle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleTheme();
+      }
+    });
+
+    retryBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      globalError.classList.remove('show');
+      submitBtn.click();
+    });
+
+    loginForm.addEventListener('submit', handleSubmit);
+
+    // ===== Initialize =====
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize theme
+      initTheme();
+      
+      // Initialize demo users
+      initDemoUsers();
+      
+      // Check if already logged in
+      const authToken = localStorage.getItem('authToken');
+      if (authToken) {
+        // Redirect to dashboard if already logged in
+        window.location.href = 'dashboard.html';
+      }
+    });
+  </script>
+</body>
+</html>

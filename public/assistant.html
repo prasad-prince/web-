@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Assistant</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0; 
+      min-height: 100vh;
+      transition: background 0.3s ease;
+    }
+    body.dark-mode { 
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    }
+    header { 
+      background: rgba(76, 175, 80, 0.9); 
+      color: #fff; 
+      padding: 12px 16px; 
+      text-align: center; 
+      position: sticky; 
+      top: 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+    body.dark-mode header {
+      background: rgba(45, 62, 45, 0.9);
+    }
+    .container { 
+      max-width: 900px; 
+      margin: 20px auto; 
+      padding: 0 12px; 
+    }
+    .chat { 
+      background: #fff; 
+      border-radius: 20px; 
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2); 
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    body.dark-mode .chat { 
+      background: #2b2b2b; 
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    .chat-header { 
+      padding: 16px 20px; 
+      border-bottom: 1px solid #eee; 
+      display: flex; 
+      align-items: center; 
+      gap: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-weight: 600;
+    }
+    body.dark-mode .chat-header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-bottom-color: #444;
+    }
+    .chat-body { 
+      height: 60vh; 
+      overflow-y: auto; 
+      padding: 20px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 12px; 
+      background: #fafcff;
+      transition: background 0.3s ease;
+    }
+    body.dark-mode .chat-body { 
+      background: #232323; 
+    }
+    .msg { 
+      max-width: 85%; 
+      padding: 12px 16px; 
+      border-radius: 12px; 
+      line-height: 1.5; 
+      font-size: 15px;
+      word-wrap: break-word;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .msg.user { 
+      align-self: flex-end; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    .msg.bot { 
+      align-self: flex-start; 
+      background: #f1f3f5;
+      color: #333;
+      border-bottom-left-radius: 4px;
+    }
+    body.dark-mode .msg.user { 
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #e9ffe9;
+    }
+    body.dark-mode .msg.bot { 
+      background: #303030; 
+      color: #f0f0f0;
+    }
+    .msg.loading {
+      background: #e0e0e0;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px;
+    }
+    body.dark-mode .msg.loading {
+      background: #3a3a3a;
+      color: #aaa;
+    }
+    .msg.loading i {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .chat-input { 
+      display: flex; 
+      gap: 8px; 
+      padding: 16px; 
+      border-top: 1px solid #eee; 
+      background: #fff;
+      transition: background 0.3s ease;
+    }
+    body.dark-mode .chat-input { 
+      background: #2b2b2b; 
+      border-top-color: #444;
+    }
+    .chat-input input { 
+      flex: 1; 
+      padding: 12px 16px; 
+      border: 2px solid #ddd; 
+      border-radius: 12px; 
+      font-size: 15px;
+      transition: all 0.3s ease;
+      background: #fff;
+      color: #333;
+    }
+    .chat-input input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    body.dark-mode .chat-input input { 
+      background: #1f1f1f; 
+      border-color: #3a3a3a; 
+      color: #f0f0f0;
+    }
+    body.dark-mode .chat-input input:focus {
+      border-color: #764ba2;
+      box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.2);
+    }
+    .chat-input button { 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff; 
+      border: none; 
+      padding: 12px 24px; 
+      border-radius: 12px; 
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 80px;
+      justify-content: center;
+    }
+    .chat-input button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    .chat-input button:active {
+      transform: translateY(0);
+    }
+    .chat-input button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    .quick-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .quick-actions button {
+      background: white;
+      border: 2px solid #667eea;
+      color: #667eea;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .quick-actions button:hover {
+      background: #667eea;
+      color: white;
+      transform: translateY(-2px);
+    }
+    body.dark-mode .quick-actions button {
+      background: #2b2b2b;
+      border-color: #764ba2;
+      color: #764ba2;
+    }
+    body.dark-mode .quick-actions button:hover {
+      background: #764ba2;
+      color: white;
+    }
+    .back { 
+      position: absolute; 
+      left: 12px; 
+      top: 12px; 
+      background: rgba(255,255,255,0.2);
+      color: #fff; 
+      border: 2px solid rgba(255,255,255,0.3);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 14px; 
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .back:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateX(-3px);
+    }
+    .dark-toggle {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      border: 2px solid rgba(255,255,255,0.3);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dark-toggle:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    .msg a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+      word-break: break-all;
+    }
+    body.dark-mode .msg a {
+      color: #8a63d2;
+    }
+    .msg a:hover {
+      text-decoration: underline;
+    }
+    .msg ul, .msg ol {
+      padding-left: 20px;
+      margin: 8px 0;
+    }
+    .msg li {
+      margin-bottom: 4px;
+    }
+    /* Scrollbar styling */
+    .chat-body::-webkit-scrollbar {
+      width: 8px;
+    }
+    .chat-body::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    .chat-body::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    .chat-body::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+    body.dark-mode .chat-body::-webkit-scrollbar-track {
+      background: #2b2b2b;
+    }
+    body.dark-mode .chat-body::-webkit-scrollbar-thumb {
+      background: #555;
+    }
+    body.dark-mode .chat-body::-webkit-scrollbar-thumb:hover {
+      background: #666;
+    }
+    /* Typing indicator */
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 8px 12px;
+    }
+    .typing-indicator span {
+      width: 8px;
+      height: 8px;
+      background: #667eea;
+      border-radius: 50%;
+      animation: typing 1.4s infinite ease-in-out;
+    }
+    .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes typing {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.6; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container {
+        margin: 10px auto;
+        padding: 0 8px;
+      }
+      .chat-body {
+        height: 65vh;
+        padding: 15px;
+      }
+      .msg {
+        max-width: 90%;
+        font-size: 14px;
+      }
+      .quick-actions {
+        gap: 8px;
+      }
+      .quick-actions button {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+      .chat-header span {
+        font-size: 14px;
+      }
+    }
+    @media (max-width: 480px) {
+      header {
+        padding: 10px;
+      }
+      .back, .dark-toggle {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+      .chat-input {
+        padding: 12px;
+      }
+      .chat-input button {
+        padding: 10px 16px;
+        min-width: 70px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <button class="back" onclick="location.href='dashboard.html'">
+      <i class="fas fa-arrow-left"></i> Back
+    </button>
+    <i class="fas fa-robot"></i> AI Assistant
+    <button class="dark-toggle" onclick="toggleDarkMode()">
+      <i class="fas fa-moon"></i>
+    </button>
+  </header>
+  
+  <div class="container">
+    <div class="chat" id="chat">
+      <div class="chat-header">
+        <i class="fas fa-robot"></i> 
+        <span>Ask anything about your study tracker</span>
+      </div>
+      <div class="chat-body" id="chatBody">
+        <div class="msg bot">
+          <i class="fas fa-robot"></i> Hi! I'm your AI assistant. I can help you with:
+          <ul>
+            <li>Study notes and summaries</li>
+            <li>Project ideas and brainstorming</li>
+            <li>YouTube video suggestions</li>
+            <li>General questions about your tracker</li>
+          </ul>
+          Ask me anything!
+        </div>
+      </div>
+      <div class="chat-input">
+        <input id="userInput" type="text" placeholder="Type your message..." autocomplete="off" />
+        <button id="sendBtn">
+          <i class="fas fa-paper-plane"></i> Send
+        </button>
+      </div>
+    </div>
+    
+    <div class="quick-actions">
+      <button id="qaIdeas"><i class="fas fa-lightbulb"></i> Ideas</button>
+      <button id="qaNotes"><i class="fas fa-sticky-note"></i> Notes</button>
+      <button id="qaSummary"><i class="fas fa-file-alt"></i> Summary</button>
+      <button id="qaYoutube"><i class="fab fa-youtube"></i> YouTube</button>
+    </div>
+  </div>
+
+  <script>
+    // DOM elements
+    const chatBody = document.getElementById('chatBody');
+    const input = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    
+    // Configuration
+    const API_BASE = (() => {
+      if (window.location.protocol === 'file:') {
+        return 'http://localhost:4000';
+      }
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:4000';
+      }
+      // For production, use relative path or your server URL
+      return '';
+    })();
+    
+    const MAX_HISTORY = 10;
+    const history = [];
+    let isLoading = false;
+
+    // Theme management
+    function loadTheme() {
+      const darkMode = localStorage.getItem('darkMode') === 'true';
+      document.body.classList.toggle('dark-mode', darkMode);
+      updateDarkModeIcon();
+    }
+    
+    function toggleDarkMode() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      localStorage.setItem('darkMode', isDark);
+      updateDarkModeIcon();
+    }
+    
+    function updateDarkModeIcon() {
+      const icon = document.querySelector('.dark-toggle i');
+      if (document.body.classList.contains('dark-mode')) {
+        icon.className = 'fas fa-sun';
+      } else {
+        icon.className = 'fas fa-moon';
+      }
+    }
+    
+    // Utility functions
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    function formatTextWithLinks(text) {
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      return text.replace(urlRegex, url => 
+        `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)}</a>`
+      );
+    }
+    
+    function appendMessage(text, role, isHtml = false) {
+      const div = document.createElement('div');
+      div.className = `msg ${role}`;
+      
+      if (isHtml) {
+        div.innerHTML = text;
+      } else {
+        div.textContent = text;
+      }
+      
+      chatBody.appendChild(div);
+      chatBody.scrollTop = chatBody.scrollHeight;
+      
+      // Add to history if not loading message
+      if (role !== 'loading') {
+        history.push({ role, content: text });
+        if (history.length > MAX_HISTORY * 2) {
+          history.splice(0, history.length - MAX_HISTORY);
+        }
+      }
+    }
+    
+    function showLoading() {
+      if (isLoading) return;
+      
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = 'msg loading bot';
+      loadingDiv.id = 'loadingMsg';
+      loadingDiv.innerHTML = '<i class="fas fa-spinner"></i> Thinking...';
+      chatBody.appendChild(loadingDiv);
+      chatBody.scrollTop = chatBody.scrollHeight;
+      
+      isLoading = true;
+      sendBtn.disabled = true;
+      input.disabled = true;
+      sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+    
+    function hideLoading() {
+      const loadingMsg = document.getElementById('loadingMsg');
+      if (loadingMsg) loadingMsg.remove();
+      
+      isLoading = false;
+      sendBtn.disabled = false;
+      input.disabled = false;
+      sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send';
+    }
+    
+    // Data handling
+    function searchNotes(query) {
+      try {
+        const notes = JSON.parse(localStorage.getItem('userNotes') || '[]');
+        const queryLower = query.toLowerCase();
+        const keywords = queryLower.split(' ').filter(k => k.length > 2);
+        
+        if (keywords.length === 0) return [];
+        
+        return notes.filter(note => {
+          const noteObj = typeof note === 'object' ? note : { text: note };
+          const noteText = (noteObj.text || note || '').toLowerCase();
+          return keywords.some(keyword => noteText.includes(keyword));
+        }).slice(0, 5);
+      } catch (error) {
+        console.error('Error searching notes:', error);
+        return [];
+      }
+    }
+    
+    // API communication
+    async function callAssistantAPI(payload) {
+      try {
+        const response = await fetch(API_BASE + '/api/assistant', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        return await response.json();
+      } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+      }
+    }
+    
+    // Message handling
+    async function sendMessage(messageText = null) {
+      const text = messageText || input.value.trim();
+      if (!text || isLoading) return;
+      
+      // Clear input if using input field
+      if (!messageText) {
+        input.value = '';
+        input.focus();
+      }
+      
+      appendMessage(text, 'user');
+      showLoading();
+      
+      try {
+        // Prepare payload
+        const noteKeywords = ['note', 'notes', 'study', 'learn', 'topic', 'subject', 'chapter'];
+        const isNoteQuery = noteKeywords.some(keyword => 
+          text.toLowerCase().includes(keyword)
+        );
+        
+        let relevantNotes = [];
+        if (isNoteQuery) {
+          relevantNotes = searchNotes(text);
+        }
+        
+        const payload = {
+          message: text,
+          history: history.slice(-MAX_HISTORY),
+          userRole: localStorage.getItem('currentUserRole') || 'student',
+          relevantNotes: relevantNotes.length > 0 ? 
+            relevantNotes.map(n => {
+              const noteObj = typeof n === 'object' ? n : { text: n };
+              return noteObj.text || n;
+            }).join('\n\n---\n\n') : undefined
+        };
+        
+        // Call API
+        const data = await callAssistantAPI(payload);
+        
+        // Hide loading and process response
+        hideLoading();
+        
+        let reply = data.reply || data.response || data.message || 'I apologize, but I could not generate a response.';
+        
+        // Add note previews if available
+        if (relevantNotes.length > 0) {
+          const notesHtml = relevantNotes.map((note, idx) => {
+            const noteObj = typeof note === 'object' ? note : { text: note };
+            const preview = (noteObj.text || note || '').substring(0, 150);
+            return `
+              <div class="note-preview" onclick="window.location.href='notes.html'">
+                <div class="note-title">
+                  <i class="fas fa-book"></i> Related Note ${idx + 1}
+                </div>
+                <div class="note-content">${escapeHtml(preview)}${(noteObj.text || note || '').length > 150 ? '...' : ''}</div>
+                <div class="note-date">
+                  <i class="fas fa-clock"></i> ${new Date(noteObj.createdAt || Date.now()).toLocaleDateString()}
+                </div>
+              </div>
+            `;
+          }).join('');
+          
+          reply = `
+            <div style="margin-bottom: 15px;">
+              <strong><i class="fas fa-book-open"></i> Found ${relevantNotes.length} related note(s):</strong>
+            </div>
+            ${notesHtml}
+            <div style="margin: 15px 0; padding: 12px; background: rgba(102, 126, 234, 0.08); border-radius: 8px; font-size: 14px; border-left: 3px solid #667eea;">
+              <i class="fas fa-info-circle"></i> Click on any note above to view full details in Notes page.
+            </div>
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.1);">
+              ${reply}
+            </div>
+          `;
+        }
+        
+        // Handle links
+        if (data.links && Array.isArray(data.links)) {
+          const linksHtml = data.links.map(link => `
+            <div style="margin: 10px 0; padding: 10px; background: rgba(102, 126, 234, 0.05); border-radius: 8px;">
+              <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">
+                <i class="fas fa-external-link-alt"></i> ${escapeHtml(link.title || link.url)}
+              </a>
+            </div>
+          `).join('');
+          
+          reply = `${reply}<br><br><strong>Helpful links:</strong>${linksHtml}`;
+        }
+        
+        // Format and append response
+        const formattedReply = formatTextWithLinks(escapeHtml(reply)).replace(/\n/g, '<br>');
+        appendMessage(formattedReply, 'bot', true);
+        
+      } catch (error) {
+        hideLoading();
+        console.error('Error:', error);
+        
+        let errorMessage = 'Sorry, I encountered an error. Please try again.';
+        if (error.message.includes('fetch') || error.message.includes('Network')) {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        } else if (error.message.includes('404')) {
+          errorMessage = 'API endpoint not found. Please make sure the server is running.';
+        }
+        
+        appendMessage(`<i class="fas fa-exclamation-triangle"></i> ${errorMessage}`, 'bot', true);
+      }
+    }
+    
+    // Quick action handlers
+    function handleQuickAction(action) {
+      if (isLoading) return;
+      
+      const prompts = {
+        ideas: 'Enter topic for project ideas:',
+        notes: 'Enter topic for study notes:',
+        summary: 'Paste text to summarize:',
+        youtube: 'Enter topic to search on YouTube:'
+      };
+      
+      const placeholder = {
+        ideas: 'e.g., Machine Learning Project',
+        notes: 'e.g., Calculus Chapter 3',
+        summary: 'Paste your text here...',
+        youtube: 'e.g., Python Tutorials for Beginners'
+      };
+      
+      const userInput = prompt(prompts[action], placeholder[action]);
+      if (!userInput || !userInput.trim()) return;
+      
+      // Add a prefix to indicate quick action
+      const prefix = {
+        ideas: '💡 ',
+        notes: '📝 ',
+        summary: '📄 ',
+        youtube: '🎥 '
+      };
+      
+      const message = `${prefix[action]}${userInput.trim()}`;
+      sendMessage(message);
+    }
+    
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load theme
+      loadTheme();
+      
+      // Focus input
+      input.focus();
+      
+      // Send message on Enter (but allow Shift+Enter for new line)
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+      
+      // Send button click
+      sendBtn.addEventListener('click', () => sendMessage());
+      
+      // Quick action buttons
+      document.getElementById('qaIdeas').addEventListener('click', () => handleQuickAction('ideas'));
+      document.getElementById('qaNotes').addEventListener('click', () => handleQuickAction('notes'));
+      document.getElementById('qaSummary').addEventListener('click', () => handleQuickAction('summary'));
+      document.getElementById('qaYoutube').addEventListener('click', () => handleQuickAction('youtube'));
+      
+      // Clear input on Escape key
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          input.value = '';
+        }
+      });
+    });
+    
+    // Make functions globally available
+    window.toggleDarkMode = toggleDarkMode;
+  </script>
+</body>
+</html>
